@@ -23,7 +23,7 @@ private:
 	class ObjectGroup* objectGroup = nullptr;
 	
 public:
-	GameManager()
+	GameManager()\
 	{
 		for (int i = 0; i < SCENE_MAXIMUM; i++) sceneManagers[i] = nullptr;
 	}

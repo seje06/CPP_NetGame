@@ -117,7 +117,7 @@ void Player::MoveL(float _deltaTime)
 			pos.x = preX;
 			return;
 		}
-		if (MapManager::GetInstance()->map[pos.y][(int)(pos.x)] == 1 && (int)pos.x == MAP_WIDTH - 1) pos.x++;
+		if (MapManager::GetInstance()->map[pos.y][(int)(pos.x)] == 1 && ((int)pos.x == MAP_WIDTH - 1 || (int)pos.x == 0)) pos.x++;
 	}
 }
 
@@ -134,7 +134,7 @@ void Player::MoveR(float _deltaTime)
 			pos.x = preX;
 			return;
 		}
-		if (MapManager::GetInstance()->map[pos.y][(int)(pos.x)] == 1 && (int)pos.x == MAP_WIDTH - 1) pos.x--;
+		if (MapManager::GetInstance()->map[pos.y][(int)(pos.x)] == 1 && ((int)pos.x == MAP_WIDTH - 1 || (int)pos.x == 0)) pos.x--;
 	}
 }
 
@@ -168,6 +168,7 @@ void Player::ReadReplicatedData(InputMemoryStream* inputStrm, uint16_t time)
 	inputStrm->Read(&hitTime, 4);
 	inputStrm->Read(&hp, 4);
 	inputStrm->Read(&isDie, 1);
+	inputStrm->Read(&color, 1);
 }
 
 void Player::WirteReplicatedData(OutputMemoryStream* outputStrm)
@@ -192,6 +193,7 @@ void Player::WirteReplicatedData(OutputMemoryStream* outputStrm)
 	outputStrm->Write(&hitTime, 4);
 	outputStrm->Write(&hp, 4);
 	outputStrm->Write(&isDie, 1);
+	outputStrm->Write(&color, 1);
 
 }
 

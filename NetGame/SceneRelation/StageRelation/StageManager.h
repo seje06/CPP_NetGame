@@ -11,15 +11,16 @@
 
 class StageManager:public SceneManager, public IManageable
 {
+public:
+	uint8_t currentStage;
 private:
 	//Player* player;
-	int currentStage;
 	
 	std::map<unsigned long, std::shared_ptr<class Player>> playerMap;
 	class EnemiesManager* enemiesManager = nullptr;
 
 	bool isPartialClear;
-	int playerDeathCount = 0;
+	int playerDeathCount;
 public:
 	StageManager();
 	virtual void Init() override;

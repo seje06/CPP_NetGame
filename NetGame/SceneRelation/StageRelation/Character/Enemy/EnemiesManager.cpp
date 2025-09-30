@@ -5,6 +5,7 @@
 #include <cmath>
 #include "../Player/Player.h"
 #include "Enemy.h"
+#include "../../MapManager.h"
 
 using namespace std;
 
@@ -19,35 +20,35 @@ void EnemiesManager::Spawn(float _deltaTime)
 			if (!enemies[i]->isActive)
 			{
 				int random = rand() % 2;
-				enemies[i]->pos.x = random == 0 ? 1 : 29;
+				enemies[i]->pos.x = random == 0 ? 1 : MAP_WIDTH-1;
 
 				enemies[i]->isActive = true;
 				switch (enemies[i]->type)
 				{
 				case ENEMY_TYPE::EASY:
 					enemies[i]->color = COLOR::WHITE;
-					enemies[i]->speed = 2;
-					enemies[i]->hp = 3;
+					enemies[i]->speed = 4;
+					enemies[i]->hp = 5;
 					break;
 				case ENEMY_TYPE::GENERAL:
 					enemies[i]->color = COLOR::YELLOW;
-					enemies[i]->speed = 4;
-					enemies[i]->hp = 4;
+					enemies[i]->speed = 5;
+					enemies[i]->hp = 6;
 					break;
 				case ENEMY_TYPE::HARD:
 					enemies[i]->color = COLOR::BLUE;
 					enemies[i]->speed = 6;
-					enemies[i]->hp = 5;
+					enemies[i]->hp = 7;
 					break;
 				case ENEMY_TYPE::FREAKISH:
 					enemies[i]->color = COLOR::BROWN;
-					enemies[i]->speed = 4;
-					enemies[i]->hp = 4;
+					enemies[i]->speed = 5;
+					enemies[i]->hp = 7;
 					break;
 				case ENEMY_TYPE::HARD_FREAKISH:
 					enemies[i]->color = COLOR::RED;
 					enemies[i]->speed = 6;
-					enemies[i]->hp = 5;
+					enemies[i]->hp = 7;
 					break;
 				}
 

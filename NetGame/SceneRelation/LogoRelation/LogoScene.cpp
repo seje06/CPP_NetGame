@@ -24,7 +24,7 @@ void LogoScene::Progress(float _deltaTime)
 void LogoScene::Render()
 {
 	// 간단 안내 렌더
-	int cx = MAP_WIDTH / 2 - 8;
+	int cx = MAP_WIDTH / 2 - 4;
 	int cy = MAP_HEIGHT / 2;
 	BufferManager::GetInstance()->WriteBuffer(cx, cy - 1, "================", (int)COLOR::YELLOW);
 	BufferManager::GetInstance()->WriteBuffer(cx, cy, "  Waiting Players...  ", (int)COLOR::LIGHTGREEN);

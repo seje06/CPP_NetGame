@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <stddef.h>
 #include <shared_mutex>
-#define LOGO_ACCEPTABLE_MAX_COUNT 3
+#define LOGO_ACCEPTABLE_MAX_COUNT 2
 
 
 typedef unsigned long PlayerID;
@@ -42,6 +42,7 @@ protected:
         int  timeDifc;                                  //클라가 서버에게 보내는 예측된 시간차이. 이후 서버가 평균화된 시간차이를 보낸다.  timeSteb : 2, 3
         uint8_t playerCount = 0;                        //해당 게임 안의 플레이어 수
         ESceneType sceneType = ESceneType::LOGO;        //현재 씬
+        uint8_t stageLevel = 0;                         //씬이 스테이지 일때 스테이지 레벨을 보내준다.
         EGameEndType gameEndType = EGameEndType::None;  //게임 끝났을때 타입. none은 안끝났단 뜻. 서버가 클라한테 보냄
     };
 
@@ -61,7 +62,6 @@ protected:
 
 public:
     unsigned long currentPlayerCount = 0;
-    // to do 스테이지용 아웃스트림 만들기
 
 protected:
 

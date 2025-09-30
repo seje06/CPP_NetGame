@@ -1,3 +1,3 @@
 #pragma once
 
-#define SERVER 0;
+#define SERVER 1;

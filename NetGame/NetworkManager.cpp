@@ -114,7 +114,8 @@ void NetworkServerManager::ProcessOnInitReliable(EPacketType inPacketType, UDPSo
 	if (playerInfoMap.find(header.playerId) == playerInfoMap.end()) // 해당 아이디가 없을시, 플레이어 정보 생성하고 응답 패킷발송.
 	{
 		*playerInfoMap[header.playerId].sockAddr = *inSocketAdr;
-		
+		cout << "New Player came in, Id : " << header.playerId << endl;
+
 		outputStrm.Write(&clientHeader, sizeof(NetReliableHeader)); //신뢰성헤더 쓰기
 		
 		ELoginResultType loginRes = ELoginResultType::Success;
@@ -128,6 +129,7 @@ void NetworkServerManager::ProcessOnInitReliable(EPacketType inPacketType, UDPSo
 		// 현재 게임 id에 대해 만들어진 게임이 없으면 만들고 게임매니저 할당받기 
 		if (gameInfoMap.find(currentGameCount) == gameInfoMap.end())
 		{
+			cout << "Game Id : " << currentGameCount<<", ";
 			gameInfoMap[currentGameCount].gameManager = GameMaker::MakeGame();
 		}
 		gameInfoMap[currentGameCount].playerIdArray[currentPlayerCountInLogo - 1] = header.playerId; //게임 정보에 해당 게임에 들어가는 플레이어 아이디 저장
@@ -138,7 +140,9 @@ void NetworkServerManager::ProcessOnInitReliable(EPacketType inPacketType, UDPSo
 		if (currentPlayerCountInLogo == LOGO_ACCEPTABLE_MAX_COUNT) //로고에 수용인원 다 차면
 		{
 			gameInfoMap[currentGameCount].gameManager->SetCurrentScene<StageManager>(SCENE_ID::STAGE); //해당 게임의 씬을 스테이지로 변경
+			cout <<"Game Id : " << currentGameCount<< ", Stage is Started" << endl;
 
+			int playerColor = int(COLOR::LIGHTBLUE);
 			for (auto& id : gameInfoMap[currentGameCount].playerIdArray)
 			{
 				
@@ -147,6 +151,7 @@ void NetworkServerManager::ProcessOnInitReliable(EPacketType inPacketType, UDPSo
 				auto player = new Player();
 				player->Init(0, PLAYER_MAX_HP, false, false);
 				player->id = id;
+				player->color = (COLOR)playerColor++;
 				shared_ptr<Player> playerPtr(player);
 				auto objGroup = gameInfoMap[currentGameCount].gameManager->GetObjects();
 				(*objGroup->playerMap)[id] = playerPtr; //해당 게임에 플레이어 캐릭 생성후 넣기
@@ -167,7 +172,7 @@ void NetworkServerManager::ProcessOnInitReliable(EPacketType inPacketType, UDPSo
 		{
 			//클라가 응답패킷을 못받았기에 다시 보내준다.
 			inUdpSocket->SendTo(playerInfoMap[header.playerId].ackBuffer, 1500, *inSocketAdr);
-			std::cout << "Player ID : " << header.playerId << " resent packet, packet num : "<< header.packetNum << std::endl;
+			std::cout << "Player Id : " << header.playerId << " resent packet, packet num : "<< header.packetNum << std::endl;
 			return;
 		}
 		else
@@ -266,8 +271,9 @@ void NetworkServerManager::ProcessOnReliable(EPacketType inPacketType, UDPSocket
 			if(gameInfoMap[playerInfoMap[header.playerId].gameId].gameEndType == EGameEndType::Lose) clientHeader.gameEndType = EGameEndType::Lose;
 			else clientHeader.gameEndType = EGameEndType::Win;
 
-			cout << "End Newwork" << endl;
 		}
+		auto stageManager = dynamic_cast<StageManager*>(gameInfoMap[playerInfoMap[header.playerId].gameId].gameManager->sceneManagers[(int)ESceneType::STAGE]);
+		if (stageManager)clientHeader.stageLevel = stageManager->currentStage; // 스테이지 레벨 보내기
 		outputStrm.Write(&clientHeader, sizeof(NetReliableHeader)); // 클라용 버퍼에 신뢰용 헤더 정보 쓰기
 
 		while (inputStrm.GetRemainingDataSize() != 0)
@@ -324,9 +330,6 @@ void NetworkServerManager::ProcessOnReliable(EPacketType inPacketType, UDPSocket
 
 			auto endScene = dynamic_cast<EndSceneManager*>(gameInfoMap[playerInfoMap[header.playerId].gameId].gameManager->sceneManagers[(int)ESceneType::End]);
 			endScene->gameId = playerInfoMap[header.playerId].gameId;
-
-			cout << "Turn End Scene" << endl;
-			
 		}
 	}
 }
@@ -347,7 +350,6 @@ NetworkClientManager::NetworkClientManager()
 
 void NetworkClientManager::SendLoginPacket(unsigned long inPlayerId,  UDPSocket* inUdpSocket, SocketAddress* inSocketAdr)
 {
-
 	OutputMemoryStream outputStrm;
 	//처음에 패킷 사이즈 넣어주는 시늉하기. 시늉인 이유는 데이터를 다넣고 나서야 패킷 크기를 알수 있는데, 패킷앞에 넣어주려면 자리를 확보해야함.
 	uint16_t tempPacketSize = outputStrm.GetLength();
@@ -511,10 +513,14 @@ void NetworkClientManager::ProcessOnReliable(EPacketType inPacketType, UDPSocket
 			return;
 		}
 
+		auto stageManager = dynamic_cast<StageManager*>(gameManager->sceneManagers[(int)ESceneType::STAGE]);
+		if (stageManager)stageManager->currentStage = header.stageLevel; // 스테이지 레벨 동기화
+
 		if (currentScene == ESceneType::LOGO) //아직 클라는 로고라 스테이지로 넘어가기
 		{
 			gameManager->SetCurrentScene<StageManager>(ESceneType::STAGE);
 		}
+		
 		while (inputStrm.GetRemainingDataSize() != 0) //데이터가 남지 않을때까지 돌린다
 		{
 			EINetObjType objType;
@@ -545,7 +551,6 @@ void NetworkClientManager::ProcessOnReliable(EPacketType inPacketType, UDPSocket
 				{
 					(*objGroup->playerMap)[pID]->ReadReplicatedData(&inputStrm, header.time);
 				}
-
 			}
 			else if (objType == EINetObjType::AI)
 			{

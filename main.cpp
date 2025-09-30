@@ -16,32 +16,31 @@
 #include <memory>
 #pragma comment(lib, "ws2_32.lib")  // 링크 설정
 
-#define EndMain(log)  {std::cout << log <<endl; WSACleanup(); return 0;}
+#define EndMain(log)  {std::cout <<"main : " << __LINE__ << " line, Log : "<< log <<endl; WSACleanup(); return 0;}
 
 using namespace std;
 
 int main()
 {
+    system("mode con cols=130 lines=30");
+
     WSADATA wsaData;  // 스택에 구조체 생성
     int res_wsaStart = WSAStartup(MAKEWORD(2, 2), &wsaData);  // 윈도우 소켓 DLL 사용 시작
-
-    std::cout << "WSAStartup result: " << res_wsaStart << std::endl;
-
     //실패시 
     if(res_wsaStart != 0) EndMain("WSAStartup failed!");
 
     UDPSocketPtr udpSocket = SocketUtil::CreateUDPSocket(SocketAddressFamily::INET); //UDP소켓 생성
-    if (udpSocket == nullptr) EndMain("main : " << __LINE__ << " line");
+    if (udpSocket == nullptr) EndMain("");
     udpSocket->SetNonBlockingMode(true); // 논블로킹으로 설정
 #if SERVER
     SocketAddressPtr socketAdressPtr = SocketAddressFactory::CreateIPv4FromString(string("127.0.0.1:1111"));
 #else
     SocketAddressPtr socketAdressPtr = SocketAddressFactory::CreateIPv4FromString(string("127.0.0.1:1111"));
 #endif
-    if (socketAdressPtr == nullptr) EndMain("main : " << __LINE__ << " line");
+    if (socketAdressPtr == nullptr) EndMain("");
 #if SERVER
     //서버소켓주소 생성후 소켓에 바인딩
-    if (udpSocket->Bind(*socketAdressPtr) != NO_ERROR) EndMain("main : " << __LINE__ << " line");
+    if (udpSocket->Bind(*socketAdressPtr) != NO_ERROR) EndMain("");
 #endif
     //데이터설정
     char packetMem[1500]; //데이터가 받아질 변수
@@ -77,7 +76,7 @@ int main()
         
         int readByteCount = udpSocket->ReceiveFrom(packetMem, packetSize, fromAddress);
         if (readByteCount == 0 || readByteCount == -WSAECONNRESET) continue;
-        else if (readByteCount < 0) EndMain("main : " << __LINE__ << " line");
+        else if (readByteCount < 0) EndMain("");
 
         
         //패킷 처리

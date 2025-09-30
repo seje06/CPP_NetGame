@@ -14,12 +14,8 @@ using namespace std;
 StageManager::StageManager()
 {
 	currentStage = 1;
-	//player = nullptr;
-#if SERVER
-
-#else
-	//GameManager::GetInstance()->AddSceneManager(this,SCENE_ID::STAGE);
-#endif
+	isPartialClear = false;
+	playerDeathCount = 0;
 	enemiesManager = new EnemiesManager();
 }
 
@@ -27,15 +23,6 @@ void StageManager::Init()
 {
 	currentStage = 1;
 
-	/*auto playerIt = playerMap.begin();
-	while (playerIt != playerMap.end())
-	{
-		dynamic_cast<Player*>(playerIt->second.get())->Init(0, PLAYER_MAX_HP, false, false);
-		playerIt++;
-	}*/
-
-	/*player = new Player();
-	player->Init(0, PLAYER_MAX_HP, false, false);*/
 	enemiesManager->Init();
 
 }
@@ -52,7 +39,6 @@ void StageManager::Progress(float _deltaTime)
 		if (currentStage == 5 && enemiesManager->IsAllDie()) NetworkServerManager::GetInstance()->gameInfoMap[gameId].gameEndType = EGameEndType::Win;
 		else NetworkServerManager::GetInstance()->gameInfoMap[gameId].gameEndType = EGameEndType::Lose;
 
-		cout << "End Game" << endl;
 		return;
 	}
 	StageLevelUp();
@@ -102,8 +88,13 @@ void StageManager::Render()
 	}
 
 	//스테이지 정보//
+	int cx = MAP_WIDTH / 2 - 4;
+	int cy = 5;
+	BufferManager::GetInstance()->WriteBuffer(cx, cy, "- Stage Level ", (int)COLOR::GREEN);
+	BufferManager::GetInstance()->WriteBuffer(cx + 7, cy, std::to_string(currentStage).c_str(), (int)COLOR::GREEN);
+	BufferManager::GetInstance()->WriteBuffer(cx+8, cy, "-", (int)COLOR::GREEN);
 
-
+	//플레이어
 	Player* player = nullptr;
 	auto playerIt = playerMap.begin();
 	while (playerIt != playerMap.end())
@@ -111,7 +102,7 @@ void StageManager::Render()
 		auto iNetObj = playerIt->second.get();
 		player = dynamic_cast<Player*>(iNetObj);
 		if (!playerIt->second) continue;
-		//플레이어
+		
 		for (int i = 0; i < PLAYER_HEIGHT; i++)
 		{
 			if(!player->isDie) BufferManager::GetInstance()->WriteBuffer((int)player->pos.x, player->pos.y + i, player->shape[player->dir][player->aniIndex][i], (int)player->color);
@@ -128,7 +119,7 @@ void StageManager::Render()
 	if(player)
 	for (int i = 0; i < player->hp; i++)
 	{
-		BufferManager::GetInstance()->WriteBuffer(i + 1, 10, "♥", (int)COLOR::WHITE);
+		BufferManager::GetInstance()->WriteBuffer(i + 1, 5, "♥", (int)COLOR::WHITE);
 	}
 
 	//총알
@@ -145,7 +136,7 @@ void StageManager::Render()
 			}
 			else if(playerMap[NetworkClientManager::GetInstance()->playerId].get()== player)
 			{
-				BufferManager::GetInstance()->WriteBuffer(++j + 20, 10, "@", (int)COLOR::WHITE);
+				BufferManager::GetInstance()->WriteBuffer(++j + MAP_WIDTH - 12, 5, "@", (int)COLOR::WHITE);
 			}
 		}
 	}
@@ -171,7 +162,7 @@ void StageManager::Render()
 void StageManager::StageLevelUp()
 {
 	
-	if (enemiesManager->deathCount % 5 == 0 && enemiesManager->deathCount != 0&& currentStage!=5)
+	if (enemiesManager->deathCount % 7 == 0 && enemiesManager->deathCount != 0&& currentStage!=5)
 	{
 		currentStage++;
 		enemiesManager->deathCount = 0;

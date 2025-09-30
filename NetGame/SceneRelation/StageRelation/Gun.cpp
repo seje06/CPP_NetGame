@@ -1,5 +1,6 @@
 #include "Gun.h"
 #include"GameTime.h"
+#include "MapManager.h"
 
 Gun::Gun(Pos& ownerPos, uint8_t& ownerDir, float speed, int ownerHeight,float reloadTime)
 {
@@ -54,7 +55,7 @@ void Gun::ControllBullet(float _deltaTime)
 			if (bullets[i]->dir == 0) bullets[i]->pos.x -= speed * _deltaTime;
 			else bullets[i]->pos.x += speed * _deltaTime;
 
-			if (bullets[i]->pos.x > 30 || bullets[i]->pos.x < 0)  bullets[i]->isActive = false;
+			if (bullets[i]->pos.x > MAP_WIDTH || bullets[i]->pos.x < 0)  bullets[i]->isActive = false;
 		}
 	}
 }
