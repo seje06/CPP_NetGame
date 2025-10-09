@@ -16,7 +16,7 @@ public:
 		return instance;
 	}
 protected:
-	Singletone() = default;
+	virtual ~Singletone() = default;
 };
 
 template<typename T>

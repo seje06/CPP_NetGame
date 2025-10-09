@@ -168,11 +168,12 @@ void NetworkServerManager::ProcessOnInitReliable(EPacketType inPacketType, UDPSo
 	}
 	else //아이디가 이미 있을시 아이디의 주인이 보낸건지 확인한다.
 	{
-		if (playerInfoMap[header.playerId].sockAddr->GetIP4Ref() == inSocketAdr->GetIP4Ref()) // 주인이 맞다면(같은 ip인지 확인. 공인 ip는 달려있는 사설ip가 여러 있기에 문제가 있긴함
+		if (playerInfoMap[header.playerId].sockAddr->GetIP4Ref() == inSocketAdr->GetIP4Ref()) // 주인이 맞다면(같은 ip인지 확인. 사설 ip까진 확인하지 않음)
 		{
 			//클라가 응답패킷을 못받았기에 다시 보내준다.
 			inUdpSocket->SendTo(playerInfoMap[header.playerId].ackBuffer, 1500, *inSocketAdr);
-			std::cout << "Player Id : " << header.playerId << " resent packet, packet num : "<< header.packetNum << std::endl;
+			*playerInfoMap[header.playerId].sockAddr = *inSocketAdr;
+			std::cout << "Player Id : " << header.playerId << ", reLogin. Packet num : "<< (int)header.packetNum << std::endl;
 			return;
 		}
 		else
@@ -453,7 +454,6 @@ void NetworkClientManager::ProcessOnInitReliable(EPacketType inPacketType, UDPSo
 void NetworkClientManager::ProcessOnReliable(EPacketType inPacketType, UDPSocket* inUdpSocket, SocketAddress* inSocketAdr, uint16_t packetSize, OutputMemoryStream& outputStrm, InputMemoryStream& inputStrm)
 {
 	if (inPacketType != EPacketType::Client) return; //패킷 타입이 안맞으면 리턴
-	if (gameManager->id == ESceneType::End) return; //현재 끝 씬이면 패킷을 받지않는다.
 
 	NetReliableHeader header;
 	inputStrm.Read(&header, sizeof(NetReliableHeader)); // 헤더 읽기
@@ -464,12 +464,16 @@ void NetworkClientManager::ProcessOnReliable(EPacketType inPacketType, UDPSocket
 	{
 		//게임 생성
 		gameManager = GameMaker::MakeGame();
+		currentPacketNum = header.packetNum;
+		isFinishInit = true;
 	}
 	else if (header.packetNum != ++currentPacketNum) // 초기화됐는데도 해당 패킷이 처음 온게 아니면 받지않는다
 	{
 		--currentPacketNum;
 		return;
 	}
+
+	if (gameManager->id == ESceneType::End) return; //현재 끝 씬이면 패킷을 받지않는다.
 
 	currentPlayerCount = header.playerCount;
 

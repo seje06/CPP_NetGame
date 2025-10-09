@@ -85,10 +85,10 @@ public:
         PlayerInfo_s();
         ~PlayerInfo_s();
         ESceneType sceneType = ESceneType::LOGO;
-        uint8_t currentPacketNum = 0;                 //받아야 할 패킷 번호보다 1작은 번호. 패킷을 보내는 경우 +2하여 보낸다. 0~255값
-        uint16_t updatedTDCount = 0;                  //예측된 컴터 시간차이가 갱신된 횟수. 65000이 넘으면. 갱신을 그만둔다.
-        float currentTimeDif = 0;                     //클라와 서버의 예측된 컴퓨터 시간차이. timeSteb : 2 를 받을 때마다 갱신될것.
-        void* ackBuffer;             //현재 패킷 번호보다 1큰 값이 패킷에 들어올 경우, 해당 버퍼로 패킷을 다시 보낸다.
+        uint8_t currentPacketNum = 0;                     //받아야 할 패킷 번호보다 1작은 번호. 패킷을 보내는 경우 +2하여 보낸다. 0~255값
+        uint16_t updatedTDCount = 0;                      //예측된 컴터 시간차이가 갱신된 횟수. 65000이 넘으면. 갱신을 그만둔다.
+        float currentTimeDif = 0;                         //클라와 서버의 예측된 컴퓨터 시간차이. timeSteb : 2 를 받을 때마다 갱신될것.
+        void* ackBuffer;                                  //현재 패킷 번호보다 1큰 값이 패킷에 들어올 경우, 해당 버퍼로 패킷을 다시 보낸다.
         std::shared_ptr<Player> playerCharac = nullptr;   //로고씬에선 null이고 인게임에선 생성한걸 여기 넣어준다
         SocketAddress* sockAddr;
         unsigned long gameId = 0;
